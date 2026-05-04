@@ -1,31 +1,31 @@
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url = 'https://repo.spongepowered.org/maven/' }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '6.0.+', changing: true
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'maven-publish'
 
-version = "0.8.2-1.19.2"
+version = "0.9.0-1.20.1"
 group = "haloofblocks.additionalguns"
 archivesBaseName = "additional-guns"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
-    mappings channel: 'official', version: '1.19.2'
+    mappings channel: 'official', version: '1.20.1'
 
     runs {
         client {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.disableRefMap', 'true'
 
             mods {
                 additionalguns {
@@ -38,7 +38,6 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.disableRefMap', 'true'
 
             mods {
                 additionalguns {
@@ -51,7 +50,6 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.disableRefMap', 'true'
             args '--mod', 'additionalguns', '--all', '--output', file('src/generated/resources/')
 
             mods {
@@ -66,19 +64,28 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    flatDir {
+        dirs 'mods'
+    }
     maven {
         url = "https://www.cursemaven.com"
     }
+    maven {
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
+    maven { url = 'https://files.minecraftforge.net/maven' }
+    maven { url = 'https://repo.spongepowered.org/maven/' }
+    mavenCentral()
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.2-43.2.0'
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.20'
 
-    implementation fg.deobf('curse.maven:framework-549225:4287474')
-    implementation fg.deobf('curse.maven:mrcrayfishs-gun-mod-289479:4344225')
-    runtimeOnly fg.deobf('curse.maven:configured-457570:4011355')
-    runtimeOnly fg.deobf('curse.maven:catalogue-459701:4171024')
-    runtimeOnly fg.deobf('curse.maven:jei-238222:4354615')
+    implementation files('mods/framework-forge-1.20.1-0.8.0.jar')
+    implementation files('mods/CGM-Unofficial-1.4.19+Forge+1.20.1.jar')
+    implementation files('mods/configured-forge-1.20.1-2.2.3.jar')
+    runtimeOnly files('mods/jei-1.20.1-forge-15.20.0.130.jar')
 }
 
 jar {

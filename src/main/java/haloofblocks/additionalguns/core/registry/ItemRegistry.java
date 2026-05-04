@@ -9,7 +9,10 @@ import com.mrcrayfish.guns.item.attachment.impl.Barrel;
 import com.mrcrayfish.guns.item.attachment.impl.Scope;
 import com.mrcrayfish.guns.item.attachment.impl.Stock;
 import com.mrcrayfish.guns.item.attachment.impl.UnderBarrel;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -20,7 +23,7 @@ import net.minecraftforge.registries.RegistryObject;
  */
 public class ItemRegistry {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, AdditionalGuns.ID);
-    public static final Item.Properties genericProperties = new Item.Properties().stacksTo(1).tab(AdditionalGuns.GROUP);
+    public static final Item.Properties genericProperties = new Item.Properties().stacksTo(1);
 
     /* Guns */
     public static final RegistryObject<Item> MAMMOTH = registerGun("mammoth", false);
@@ -71,9 +74,9 @@ public class ItemRegistry {
 
 
     /* Scope Attachments */
-    public static final RegistryObject<Item> HOLO_SCOPE = ITEMS.register("holo_scope", () -> new ScopeItem(Scope.builder().additionalZoom(0.25F).reticleOffset(1.6F).viewFinderOffset(0.4).modifiers(GunModifiers.SLOW_ADS).build(), genericProperties, false));
-    public static final RegistryObject<Item> ZERKALO_SCOPE = ITEMS.register("zerkalo_scope", () -> new ScopeItem(Scope.builder().additionalZoom(0.025F).reticleOffset(1.25F).viewFinderOffset(0.3).modifiers(GunModifiers.SLOWER_ADS).build(), genericProperties, false));
-    public static final RegistryObject<Item> KOBRA_SCOPE = ITEMS.register("kobra", () -> new ScopeItem(Scope.builder().additionalZoom(0.15F).reticleOffset(1.75F).viewFinderOffset(0.4).modifiers(GunModifiers.SLOW_ADS).build(), genericProperties));
+    public static final RegistryObject<Item> HOLO_SCOPE = ITEMS.register("holo_scope", () -> new ScopeItem(Scope.builder().aimFovModifier(0.25F).build(), genericProperties, false));
+    public static final RegistryObject<Item> ZERKALO_SCOPE = ITEMS.register("zerkalo_scope", () -> new ScopeItem(Scope.builder().aimFovModifier(0.025F).build(), genericProperties, false));
+    public static final RegistryObject<Item> KOBRA_SCOPE = ITEMS.register("kobra", () -> new ScopeItem(Scope.builder().aimFovModifier(0.15F).build(), genericProperties));
     // Removed until fixed!
     //public static final RegistryObject<Item> ULTRA_LONG_SCOPE = ITEMS.register("extra_long_scope", () -> new ScopeItem(Scope.create(0.45F, 1.25D, GunModifiers.SLOWER_ADS).viewFinderOffset(0.5), genericProperties));
 
@@ -124,10 +127,92 @@ public class ItemRegistry {
      * @return The ammunition
      */
     private static RegistryObject<Item> registerAmmo(String name) {
-        return ITEMS.register(name, () -> new AmmoItem(new Item.Properties().tab(AdditionalGuns.GROUP)));
+        return ITEMS.register(name, () -> new AmmoItem(new Item.Properties()));
     }
 
     private static RegistryObject<Item> registerCasing(String name) {
-        return ITEMS.register(name, () -> new BulletCasingItem(new Item.Properties().tab(AdditionalGuns.GROUP)));
+        return ITEMS.register(name, () -> new BulletCasingItem(new Item.Properties()));
+    }
+
+    /**
+     * Register all items to the Combat creative tab
+     */
+    public static void addItemsToCreativeTab(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.COMBAT) {
+            // Guns
+            event.accept(MAMMOTH.get());
+            event.accept(VECTOR.get());
+            event.accept(NINE_A_NINE_ONE.get());
+            event.accept(ACE_OF_SPADES.get());
+            event.accept(G_ELEVEN.get());
+            event.accept(VINTOREZ.get());
+            event.accept(VAL.get());
+            event.accept(AUG.get());
+            event.accept(FN_TWO_THOUSAND.get());
+            event.accept(PP_NINETEEN.get());
+            event.accept(MAT_FORTY_NINE.get());
+            event.accept(SCHWARZLOSE.get());
+            event.accept(OTS_THREE.get());
+            event.accept(AK_HUNDRED_FIVE.get());
+            event.accept(RAVENS_CLAW.get());
+            event.accept(BANSHEE.get());
+            event.accept(M_FOUR_A_ONE_S.get());
+            event.accept(M_FOUR_A_FOUR.get());
+            event.accept(GLOCK_EIGHT_TEEN.get());
+            event.accept(AKM.get());
+            event.accept(AKM_CUSTOM.get());
+            event.accept(SSG_ZERO_EIGHT.get());
+            event.accept(DESERT_EAGLE.get());
+            event.accept(MAC_TEN.get());
+            event.accept(AWM.get());
+            event.accept(AK_SEVENTY_FOUR.get());
+            event.accept(AK_SEVENTY_FOUR_M.get());
+            event.accept(AKS_SEVENTY_FOUR_U.get());
+            event.accept(M_SIXTEEN_A_TWO.get());
+            event.accept(USP.get());
+            event.accept(M_ONE_ZERO_ONE_FOUR.get());
+            event.accept(MP_SEVEN_A_TWO.get());
+            event.accept(AK_ONE_TWO.get());
+            event.accept(AK_ONE_FIVE.get());
+            event.accept(AK_ONE_ZERO_FOUR.get());
+            event.accept(P_TWO_FIVE_ZERO.get());
+            event.accept(M_ONE_NINE_ONE_ONE.get());
+            event.accept(MAGNUM.get());
+            event.accept(SCAR.get());
+            event.accept(OVER_UNDER.get());
+            event.accept(CUSTOM_MAC.get());
+            event.accept(USAS_TWELVE.get());
+            event.accept(PYTHON.get());
+            event.accept(UNICA.get());
+            event.accept(MP_SEVEN.get());
+
+            // Attachments
+            event.accept(HOLO_SCOPE.get());
+            event.accept(ZERKALO_SCOPE.get());
+            event.accept(KOBRA_SCOPE.get());
+            event.accept(BASIC_STOCK.get());
+            event.accept(VINTOREZ_STOCK.get());
+            event.accept(MUZZLE_BRAKE.get());
+            event.accept(TACTICAL_SILENCER.get());
+            event.accept(SNIPER_MUZZLE_BRAKE.get());
+            event.accept(TACTICAL_MUZZLE_BRAKE.get());
+            event.accept(ANGLED_GRIP.get());
+
+            // Ammo
+            event.accept(BULLET_HEAVY.get());
+            event.accept(BULLET_LONG.get());
+            event.accept(BULLET_MEDIUM.get());
+            event.accept(BULLET_SHORT.get());
+            event.accept(BULLET_SMALL.get());
+            event.accept(BULLET_SPECIAL.get());
+
+            // Casings
+            event.accept(CASING_HEAVY.get());
+            event.accept(CASING_LONG.get());
+            event.accept(CASING_MEDIUM.get());
+            event.accept(CASING_SHORT.get());
+            event.accept(CASING_SMALL.get());
+            event.accept(CASING_SPECIAL.get());
+        }
     }
 }
