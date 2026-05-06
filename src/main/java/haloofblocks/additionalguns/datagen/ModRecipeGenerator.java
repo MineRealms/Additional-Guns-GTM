@@ -1,5 +1,7 @@
 package haloofblocks.additionalguns.datagen;
 
+import haloofblocks.additionalguns.config.RecipeConfigData;
+import haloofblocks.additionalguns.config.RecipeConfigManager;
 import haloofblocks.additionalguns.core.registry.ItemRegistry;
 import com.mrcrayfish.guns.crafting.WorkbenchIngredient;
 import com.mrcrayfish.guns.crafting.WorkbenchRecipeBuilder;
@@ -8,7 +10,11 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.world.item.Items;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.Tags;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.function.Consumer;
 
@@ -23,6 +29,15 @@ public class ModRecipeGenerator extends RecipeProvider {
 
     @Override
     protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
+        
+        // Generate default recipes
+        generateDefaultRecipes(consumer);
+        
+        // Generate custom recipes from config
+        generateCustomRecipes(consumer);
+    }
+    
+    private void generateDefaultRecipes(Consumer<FinishedRecipe> consumer) {
 
         // Guns
         WorkbenchRecipeBuilder.crafting(ItemRegistry.MAMMOTH.get())
@@ -426,5 +441,36 @@ public class ModRecipeGenerator extends RecipeProvider {
                 .addIngredient(WorkbenchIngredient.of(Tags.Items.NUGGETS_IRON, 4))
                 .addCriterion("has_iron_nugget", has(Tags.Items.NUGGETS_IRON))
                 .build(consumer);
+    }
+    
+    private void generateCustomRecipes(Consumer<FinishedRecipe> consumer) {
+        RecipeConfigData configData = RecipeConfigManager.getData();
+        if (configData == null || configData.getRecipes().isEmpty()) {
+            return;
+        }
+        
+        for (RecipeConfigData.RecipeEntry entry : configData.getRecipes()) {
+            try {
+                String resultItem = entry.getResult();
+                Item result = ForgeRegistries.ITEMS.getValue(new ResourceLocation(resultItem));
+                
+                if (result == null) {
+                    continue;
+                }
+                
+                WorkbenchRecipeBuilder builder = WorkbenchRecipeBuilder.crafting(result);
+                
+                for (RecipeConfigData.IngredientEntry ingredient : entry.getIngredients()) {
+                    Item ingredientItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(ingredient.getItem()));
+                    if (ingredientItem != null) {
+                        builder.addIngredient(WorkbenchIngredient.of(ingredientItem, ingredient.getCount()));
+                    }
+                }
+                
+                builder.build(consumer);
+            } catch (Exception e) {
+                // Skip invalid recipes
+            }
+        }
     }
 }
