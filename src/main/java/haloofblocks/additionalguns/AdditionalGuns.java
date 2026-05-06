@@ -7,10 +7,9 @@ import haloofblocks.additionalguns.core.registry.ItemRegistry;
 import haloofblocks.additionalguns.core.registry.SoundRegistry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -24,17 +23,17 @@ public class AdditionalGuns {
     public static final String ID = "additionalguns";
 
     public AdditionalGuns() {
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.clientConfig);
+
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.register(this);
-
-        FMLJavaModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, Config.clientConfig);
+        AdditionalGunsTab.ADDITIONAL_TAB.register(bus);
 
         ItemRegistry.ITEMS.register(bus);
         SoundRegistry.SOUNDS.register(bus);
 
         bus.addListener(this::clientSetup);
         bus.addListener(this::gatherData);
-        bus.addListener(this::addCreative);
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
@@ -43,11 +42,7 @@ public class AdditionalGuns {
 
     private void gatherData(final GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();
-        PackOutput output = generator.getPackOutput();
-        generator.addProvider(event.includeServer(), new ModRecipeGenerator(output));
-    }
-
-    private void addCreative(final BuildCreativeModeTabContentsEvent event) {
-        ItemRegistry.addItemsToCreativeTab(event);
+        PackOutput packOutput = generator.getPackOutput();
+        generator.addProvider(event.includeServer(), new ModRecipeGenerator(packOutput));
     }
 }

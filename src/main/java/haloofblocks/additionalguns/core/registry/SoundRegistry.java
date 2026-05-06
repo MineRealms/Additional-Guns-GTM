@@ -55,6 +55,6 @@ public class SoundRegistry {
     public static final RegistryObject<SoundEvent> USAS_TWELVE = register("item.usas12.fire");
 
     private static RegistryObject<SoundEvent> register(String name) {
-        return SOUNDS.register(name, () -> new SoundEvent(new ResourceLocation(AdditionalGuns.ID, name)));
+        return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(AdditionalGuns.ID, name)));
     }
 }
