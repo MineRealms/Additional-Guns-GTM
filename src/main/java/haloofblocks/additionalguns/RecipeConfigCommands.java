@@ -25,12 +25,7 @@ public class RecipeConfigCommands {
                         ItemStack stack = player.getInventory().getItem(i);
                         if (!stack.isEmpty()) {
                             ResourceLocation id = ForgeRegistries.ITEMS.getKey(stack.getItem());
-                            String info = String.format("[%d] %s x%d - %s", 
-                                i, 
-                                id.toString(),
-                                stack.getCount(),
-                                stack.getHoverName().getString()
-                            );
+                            String info = String.format("[%d] %s x%d", i, id.toString(), stack.getCount());
                             player.sendSystemMessage(Component.literal(info));
                         }
                     }
@@ -44,14 +39,38 @@ public class RecipeConfigCommands {
                 .then(Commands.literal("reload")
                         .executes(ctx -> {
                             ServerPlayer player = ctx.getSource().getPlayerOrException();
-                            
-                            try {
-                                haloofblocks.additionalguns.config.RecipeConfigManager.load();
-                                player.sendSystemMessage(Component.literal("Recipes reloaded!"));
-                            } catch (Exception e) {
-                                player.sendSystemMessage(Component.literal("Error: " + e.getMessage()));
+                            haloofblocks.additionalguns.config.RecipeConfigManager.load();
+                            player.sendSystemMessage(Component.literal("[OK] Config reloaded! Restart world to apply new recipes."));
+                            return 1;
+                        }))
+                .then(Commands.literal("path")
+                        .executes(ctx -> {
+                            ServerPlayer player = ctx.getSource().getPlayerOrException();
+                            player.sendSystemMessage(Component.literal("[RecipeTweak] " + 
+                                haloofblocks.additionalguns.config.RecipeConfigManager.getConfigPath()));
+                            return 1;
+                        }))
+                .then(Commands.literal("list")
+                        .executes(ctx -> {
+                            ServerPlayer player = ctx.getSource().getPlayerOrException();
+                            var data = haloofblocks.additionalguns.config.RecipeConfigManager.getData();
+                            player.sendSystemMessage(Component.literal("=== Custom Recipes ==="));
+                            if (data != null && data.getRecipes() != null) {
+                                for (var recipe : data.getRecipes()) {
+                                    player.sendSystemMessage(Component.literal(recipe.getResult()));
+                                }
+                            } else {
+                                player.sendSystemMessage(Component.literal("(none)"));
                             }
                             return 1;
-                        })));
+                        }))
+                .executes(ctx -> {
+                    ServerPlayer player = ctx.getSource().getPlayerOrException();
+                    player.sendSystemMessage(Component.literal("=== RecipeTweak ==="));
+                    player.sendSystemMessage(Component.literal("/recipetweak reload - Reload config"));
+                    player.sendSystemMessage(Component.literal("/recipetweak path - Show config file"));
+                    player.sendSystemMessage(Component.literal("/recipetweak list - List recipes"));
+                    return 1;
+                }));
     }
 }
