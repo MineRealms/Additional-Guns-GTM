@@ -2,9 +2,12 @@ package haloofblocks.additionalguns;
 
 import haloofblocks.additionalguns.client.ClientHandler;
 import haloofblocks.additionalguns.config.Config;
+import haloofblocks.additionalguns.config.RecipeConfigManager;
 import haloofblocks.additionalguns.datagen.ModRecipeGenerator;
 import haloofblocks.additionalguns.core.registry.ItemRegistry;
 import haloofblocks.additionalguns.core.registry.SoundRegistry;
+import haloofblocks.additionalguns.network.PacketHandler;
+import haloofblocks.additionalguns.network.RecipePackets;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.data.event.GatherDataEvent;
@@ -34,6 +37,17 @@ public class AdditionalGuns {
 
         bus.addListener(this::clientSetup);
         bus.addListener(this::gatherData);
+        
+        RecipeConfigManager.load();
+        PacketHandler.init();
+        PacketHandler.registerMessage(0, RecipePackets.OpenGuiMessage.class,
+            RecipePackets.OpenGuiMessage::encode,
+            RecipePackets.OpenGuiMessage::decode,
+            RecipePackets.OpenGuiMessage::handle);
+        PacketHandler.registerMessage(1, RecipePackets.ConfigSyncMessage.class,
+            RecipePackets.ConfigSyncMessage::encode,
+            RecipePackets.ConfigSyncMessage::decode,
+            RecipePackets.ConfigSyncMessage::handle);
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
