@@ -1,8 +1,10 @@
 package haloofblocks.additionalguns;
 
+import haloofblocks.additionalguns.config.RecipeConfigManager;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -12,7 +14,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber(modid = AdditionalGuns.ID)
 public class RecipeConfigCommands {
-    
+
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("inventorylist")
@@ -20,7 +22,7 @@ public class RecipeConfigCommands {
                 .executes(ctx -> {
                     ServerPlayer player = ctx.getSource().getPlayerOrException();
                     player.sendSystemMessage(Component.literal("=== PLAYER INVENTORY ==="));
-                    
+
                     for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
                         ItemStack stack = player.getInventory().getItem(i);
                         if (!stack.isEmpty()) {
@@ -29,35 +31,66 @@ public class RecipeConfigCommands {
                             player.sendSystemMessage(Component.literal(info));
                         }
                     }
-                    
+
                     player.sendSystemMessage(Component.literal("======================"));
                     return 1;
                 }));
-        
+
         event.getDispatcher().register(Commands.literal("recipetweak")
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("reload")
                         .executes(ctx -> {
                             ServerPlayer player = ctx.getSource().getPlayerOrException();
-                            haloofblocks.additionalguns.config.RecipeConfigManager.load();
-                            player.sendSystemMessage(Component.literal("[OK] Config reloaded! Restart world to apply new recipes."));
+                            MinecraftServer server = player.getServer();
+                            if (server == null) {
+                                player.sendSystemMessage(Component.literal("[ERROR] No server"));
+                                return 1;
+                            }
+
+                            try {
+                                RecipeConfigManager.setServer(server);
+                                RecipeConfigManager.reloadRecipes();
+                                int count = RecipeConfigManager.getData() != null ? RecipeConfigManager.getData().getRecipes().size() : 0;
+                                player.sendSystemMessage(Component.literal("[OK] Config reloaded: " + count + " recipes"));
+                            } catch (Exception e) {
+                                player.sendSystemMessage(Component.literal("[ERROR] " + e.getMessage()));
+                                e.printStackTrace();
+                            }
+                            return 1;
+                        }))
+                .then(Commands.literal("export")
+                        .executes(ctx -> {
+                            ServerPlayer player = ctx.getSource().getPlayerOrException();
+
+                            try {
+                                RecipeConfigManager.load();
+                                RecipeConfigManager.exportRecipesToConfig();
+
+                                player.sendSystemMessage(Component.literal("[OK] Exported " +
+                                    RecipeConfigManager.getData().getRecipes().size() + " recipes to config!"));
+                            } catch (Exception e) {
+                                player.sendSystemMessage(Component.literal("[ERROR] " + e.getMessage()));
+                                e.printStackTrace();
+                            }
                             return 1;
                         }))
                 .then(Commands.literal("path")
                         .executes(ctx -> {
                             ServerPlayer player = ctx.getSource().getPlayerOrException();
-                            player.sendSystemMessage(Component.literal("[RecipeTweak] " + 
-                                haloofblocks.additionalguns.config.RecipeConfigManager.getConfigPath()));
+                            player.sendSystemMessage(Component.literal("[RecipeTweak] " +
+                                RecipeConfigManager.getConfigPath()));
                             return 1;
                         }))
-                .then(Commands.literal("list")
+.then(Commands.literal("list")
                         .executes(ctx -> {
                             ServerPlayer player = ctx.getSource().getPlayerOrException();
-                            var data = haloofblocks.additionalguns.config.RecipeConfigManager.getData();
+                            var data = RecipeConfigManager.getData();
                             player.sendSystemMessage(Component.literal("=== Custom Recipes ==="));
                             if (data != null && data.getRecipes() != null) {
+                                player.sendSystemMessage(Component.literal("Total: " + data.getRecipes().size()));
                                 for (var recipe : data.getRecipes()) {
-                                    player.sendSystemMessage(Component.literal(recipe.getResult()));
+                                    String result = recipe.getResultString();
+                                    player.sendSystemMessage(Component.literal(result != null ? result : "unknown"));
                                 }
                             } else {
                                 player.sendSystemMessage(Component.literal("(none)"));
@@ -68,7 +101,8 @@ public class RecipeConfigCommands {
                     ServerPlayer player = ctx.getSource().getPlayerOrException();
                     player.sendSystemMessage(Component.literal("=== RecipeTweak ==="));
                     player.sendSystemMessage(Component.literal("/recipetweak reload - Reload config"));
-                    player.sendSystemMessage(Component.literal("/recipetweak path - Show config file"));
+                    player.sendSystemMessage(Component.literal("/recipetweak export - Export all recipes to JSON config"));
+                    player.sendSystemMessage(Component.literal("/recipetweak path - Show config path"));
                     player.sendSystemMessage(Component.literal("/recipetweak list - List recipes"));
                     return 1;
                 }));

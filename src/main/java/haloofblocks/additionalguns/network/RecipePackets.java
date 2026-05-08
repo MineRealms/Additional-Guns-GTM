@@ -2,7 +2,6 @@ package haloofblocks.additionalguns.network;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
-import haloofblocks.additionalguns.client.gui.screens.RecipeEditorScreen;
 
 import java.util.function.Supplier;
 
@@ -18,9 +17,6 @@ public class RecipePackets {
         }
         
         public static void handle(OpenGuiMessage msg, Supplier<NetworkEvent.Context> ctx) {
-            // Open GUI on client side
-            net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
-            mc.setScreen(new RecipeEditorScreen());
             ctx.get().setPacketHandled(true);
         }
     }

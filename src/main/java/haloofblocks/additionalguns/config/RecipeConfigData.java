@@ -18,34 +18,82 @@ public class RecipeConfigData {
 
     public static class RecipeEntry {
         @SerializedName("result")
-        private String result;
+        private ResultEntry result;
 
+        @SerializedName("result_item")
+        private String resultItem;
+        
+        @SerializedName("materials")
+        private List<IngredientEntry> materials = new ArrayList<>();
+        
         @SerializedName("ingredients")
         private List<IngredientEntry> ingredients = new ArrayList<>();
 
-        public String getResult() {
+        public String getResultString() {
+            if (result != null && result.getItem() != null) {
+                return result.getItem();
+            }
+            return resultItem;
+        }
+        
+        public ResultEntry getResult() {
             return result;
         }
 
-        public void setResult(String result) {
+        public void setResult(ResultEntry result) {
             this.result = result;
+        }
+        
+        public void setResultItem(String resultItem) {
+            this.resultItem = resultItem;
         }
 
         public List<IngredientEntry> getIngredients() {
-            return ingredients;
+            return ingredients != null && !ingredients.isEmpty() ? ingredients : materials;
         }
 
         public void setIngredients(List<IngredientEntry> ingredients) {
             this.ingredients = ingredients;
+        }
+        
+        public void setMaterials(List<IngredientEntry> materials) {
+            this.materials = materials;
+        }
+    }
+
+    public static class ResultEntry {
+        @SerializedName("item")
+        private String item;
+        
+        @SerializedName("tag")
+        private String tag;
+
+        public String getItem() {
+            return item;
+        }
+        
+        public String getTag() {
+            return tag;
+        }
+
+        public void setItem(String item) {
+            this.item = item;
+        }
+        
+        public void setTag(String tag) {
+            this.tag = tag;
         }
     }
 
     public static class IngredientEntry {
         @SerializedName("item")
         private String item;
-
+        
+        @SerializedName("tag")
+        private String tag;
+        
         @SerializedName("count")
-        private int count;
+        private int count = 1;
 
         public IngredientEntry() {}
 
@@ -57,9 +105,21 @@ public class RecipeConfigData {
         public String getItem() {
             return item;
         }
+        
+        public String getTag() {
+            return tag;
+        }
+        
+        public String getId() {
+            return item != null ? item : tag;
+        }
 
         public void setItem(String item) {
             this.item = item;
+        }
+        
+        public void setTag(String tag) {
+            this.tag = tag;
         }
 
         public int getCount() {

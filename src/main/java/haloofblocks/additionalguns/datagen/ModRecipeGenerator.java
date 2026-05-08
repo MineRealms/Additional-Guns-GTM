@@ -445,16 +445,25 @@ public class ModRecipeGenerator extends RecipeProvider {
     
     private void generateCustomRecipes(Consumer<FinishedRecipe> consumer) {
         RecipeConfigData configData = RecipeConfigManager.getData();
+        System.out.println("[AdditionalGuns Datagen] generateCustomRecipes: " + (configData != null ? configData.getRecipes().size() : "null") + " recipes");
         if (configData == null || configData.getRecipes().isEmpty()) {
+            System.out.println("[AdditionalGuns Datagen] No custom recipes to generate");
             return;
         }
         
         for (RecipeConfigData.RecipeEntry entry : configData.getRecipes()) {
             try {
-                String resultItem = entry.getResult();
-                Item result = ForgeRegistries.ITEMS.getValue(new ResourceLocation(resultItem));
+                String resultItem = entry.getResultString();
+                System.out.println("[AdditionalGuns Datagen] Processing: " + resultItem);
                 
+                if (resultItem == null || resultItem.isEmpty()) {
+                    System.out.println("[AdditionalGuns Datagen] Skipping: empty result");
+                    continue;
+                }
+                
+                Item result = ForgeRegistries.ITEMS.getValue(new ResourceLocation(resultItem));
                 if (result == null) {
+                    System.out.println("[AdditionalGuns Datagen] ERROR: Could not find item: " + resultItem);
                     continue;
                 }
                 
@@ -462,14 +471,19 @@ public class ModRecipeGenerator extends RecipeProvider {
                 
                 for (RecipeConfigData.IngredientEntry ingredient : entry.getIngredients()) {
                     Item ingredientItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(ingredient.getItem()));
+                    System.out.println("[AdditionalGuns Datagen] Ingredient: " + ingredient.getItem() + " = " + ingredientItem);
                     if (ingredientItem != null) {
                         builder.addIngredient(WorkbenchIngredient.of(ingredientItem, ingredient.getCount()));
+                    } else {
+                        System.out.println("[AdditionalGuns Datagen] ERROR: Could not find ingredient: " + ingredient.getItem());
                     }
                 }
                 
                 builder.build(consumer);
+                System.out.println("[AdditionalGuns Datagen] Built recipe for: " + resultItem);
             } catch (Exception e) {
-                // Skip invalid recipes
+                System.out.println("[AdditionalGuns Datagen] ERROR building recipe: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
